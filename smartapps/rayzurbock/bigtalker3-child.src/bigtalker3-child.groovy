@@ -1,10 +1,10 @@
 definition(
-    name: "BigTalker3-Child",
+    name: "BigTalker3-Child-DEV",
     namespace: "rayzurbock",
     author: "rayzur@rayzurbock.com",
     description: "Do not install in the mobile app, Save don't publish (needed by BigTalker3)",
     category: "Fun & Social",
-    parent: "rayzurbock:BigTalker3-Parent",
+    parent: "rayzurbock:BigTalker3-Parent-DEV",
     iconUrl: "https://lowrance.cc/ST/icons/BigTalker.png",
     iconX2Url: "https://lowrance.cc/ST/icons/BigTalker@2x.png",
     iconX3Url: "https://lowrance.cc/ST/icons/BigTalker@2x.png")
@@ -2598,9 +2598,9 @@ def updateCheckAllowed(){
 }
 
 def setVersion(){
-		state.version = "3.0.0"	 
-    	state.InternalName = "BigTalker3-Child" 
-		state.ExternalName = "BigTalker3 Child"
+		state.version = "3.0.0-a6"	 
+    	state.InternalName = "BigTalker3-Child-DEV" 
+		state.ExternalName = "BigTalker3 Child-DEV"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App
 }
 
