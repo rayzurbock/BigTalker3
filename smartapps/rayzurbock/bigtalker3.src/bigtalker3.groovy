@@ -113,6 +113,7 @@ def pageTalkNow(){
             input name: "talkNowSpeechDeviceMusicPlayer", type: "capability.musicPlayer", title: "Music players (e.g. Sonos, VLCThing)", multiple: true, required: false, submitOnChange: true
             input name: "talkNowSpeechDeviceSpeechSynthesis", type: "capability.speechSynthesis", title: "Speech speakers (e.g. Echo, Google Home, LANnouncer)", multiple: true, required: false, submitOnChange: true
             input name: "talkNowSpeechDeviceAudioNotification", type: "capability.audioNotification", title: "Audio notification devices", multiple: true, required: false, submitOnChange: true
+            input name: "talkNowTextDevice", type: "capability.notification", title: "Text Only devices (e.g. Hubitat mobile app, Telegram, Pushover)", multiple: true, required: false, submitOnChange: true
             //LOGDEBUG("previoustext=${state.lastTalkNow} New=${settings.speechTalkNow}")
             def talkNowDevs = []
             if (settings.talkNowSpeechDeviceMusicPlayer) { talkNowDevs = talkNowDevs + settings.talkNowSpeechDeviceMusicPlayer }
@@ -137,6 +138,7 @@ def pageTalkNow(){
                 def personality = false
                 LOGDEBUG ("TalkNow Voice=${myVoice}")
                 Talk("Talk Now", settings.speechTalkNow, talkNowDevs, myVolume, myTalkNowResume, personality, myVoice, customevent)
+                Notify("Talk Now", settings.speechTalkNow, settings.talkNowTextDevice, customevent)
                 state.lastTalkNow = settings.speechTalkNow
             }
         }
@@ -245,6 +247,10 @@ def pageConfigureDefaults(){
            input "speechDeviceDefaultMusicPlayer", "capability.musicPlayer", title: "Music players (default, e.g. Sonos, VLCThing)", multiple: true, required: false, submitOnChange: false
            input "speechDeviceDefaultSpeechSynthesis", "capability.speechSynthesis", title: "Speech speakers (default, e.g. Echo, Google Home, LANnouncer)", multiple: true, required: false, submitOnChange: false
            input "speechDeviceDefaultAudioNotification", "capability.audioNotification", title: "Audio notification devices (default)", multiple: true, required: false, submitOnChange: false
+        }
+        section("${state.formatSettingRootStart}Text Only (default):${state.formatSettingRootEnd}"){
+            paragraph "Notification devices receive a text copy of announcements (e.g. Hubitat mobile app, Telegram, Pushover). Pick them here as the app default; each event group and device type can override this."
+            input "textDeviceDefault", "capability.notification", title: "Text Only devices (default)", multiple: true, required: false, submitOnChange: false
         }
         if (true) {
             section ("${state.formatSettingRootStart}Adjust volume during announcement <I>(optional; Supports: Sonos, VLC-Thing):${state.formatSettingRootEnd}"){
@@ -1075,6 +1081,31 @@ private def myRunIn(delay_s, func) {
     }
 }
 
+def Notify(appname, phrase, customTextDevices, evt){
+    //Text Only announcements: the same phrase as speech, delivered as text to notification devices (Hubitat mobile app, Telegram, Pushover, etc.)
+    def devices = customTextDevices ?: getDefaultTextDevices()
+    if (!devices) { return }
+    if (phrase == null || phrase == "") { return }
+    def text = processPhraseVariables(appname, phrase, evt, null)
+    if (text == null || text == "") { return }
+    if (text.toLowerCase().contains(".mp3") || text.toLowerCase().contains("%askalexa%")) {
+        LOGDEBUG("Notify: phrase is audio-only (MP3/AskAlexa); skipping text notification", true)
+        return
+    }
+    devices.each { d ->
+        try {
+            if (d.hasCommand("deviceNotification")) {
+                d.deviceNotification(text)
+                LOGTRACE("NOTIFY(${appname})|${d.displayName} >> ${text}")
+            } else {
+                LOGERROR("Notify: ${d.displayName} does not support deviceNotification - skipped.")
+            }
+        } catch (ex) {
+            LOGERROR("Notify: failed to send text to ${d.displayName}: ${ex}")
+        }
+    }
+}
+
 def TalkQueue(appname, phrase, customSpeechDevice, volume, resume, personality, voice, evt){
     //IN DEVELOPMENT
     // Already talking or just recently (within x seconds) started talking
@@ -1367,6 +1398,13 @@ def getDefaultSpeechDevices(){
     if (settings?.speechDeviceDefaultMusicPlayer) { devs = devs + settings.speechDeviceDefaultMusicPlayer }
     if (settings?.speechDeviceDefaultSpeechSynthesis) { devs = devs + settings.speechDeviceDefaultSpeechSynthesis }
     if (settings?.speechDeviceDefaultAudioNotification) { devs = devs + settings.speechDeviceDefaultAudioNotification }
+    return devs
+}
+
+def getDefaultTextDevices(){
+    //Default Text Only devices picked in the app defaults page
+    def devs = []
+    if (settings?.textDeviceDefault) { devs = devs + settings.textDeviceDefault }
     return devs
 }
 
@@ -1906,7 +1944,7 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.0-a3"	 
+		state.version = "3.0.0-a4"	 
 		state.InternalName = "BigTalker3-Parent-DEV" 
 		state.ExternalName = "BigTalker3-DEV"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App
