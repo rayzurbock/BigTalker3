@@ -1549,6 +1549,7 @@ def pageHelpPhraseTokens(){
            AvailTokens += "${state.formatUlStart}${state.formatLiStart}${state.formatIStart}No other tokens or phrases can be used with %mp3(url)%${state.formatIEnd}${state.formatLiEnd}${state.formatUlEnd}"
 		   AvailTokens += "${state.formatLiEnd}"
            AvailTokens += "${state.formatLiStart}${state.formatStrongStart}%time%${state.formatStrongEnd} = Current hub time; HH:mm am/pm${state.formatStrongEnd}${state.formatLiEnd}"
+           AvailTokens += "${state.formatLiStart}${state.formatStrongStart}%value%${state.formatStrongEnd} = Wattage value; only applicable in Power Meter events${state.formatLiEnd}"
 		   AvailTokens += "${state.formatUlEnd}"
            AvailTokens += "${state.formatLiStart}${state.formatStrongStart}%weathercurrent%${state.formatStrongEnd} = Current weather based on hub location${state.formatLiEnd}"
            AvailTokens += "${state.formatLiStart}${state.formatStrongStart}%weathertoday%${state.formatStrongEnd} = Today's weather forecast* based on hub location${state.formatLiEnd}"
