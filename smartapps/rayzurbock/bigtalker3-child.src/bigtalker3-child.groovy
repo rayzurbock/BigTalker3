@@ -35,7 +35,7 @@ def pageConfigureEvents(){
     initFormattingVars()
     setVersion()
     state.hubType = parent.returnVar("hubType")
-    dynamicPage(name: "pageConfigureEvents", title: "Configure Events", install: (app?.getInstallationState() != "COMPLETE"), uninstall: (app?.getInstallationState() == "COMPLETE")) {
+    dynamicPage(name: "pageConfigureEvents", title: "Configure Events", install: true, uninstall: true) {
         section("Group Settings:"){
             label(name: "labelRequired", title: "Event Group Name:", defaultValue: "Change this", required: true, multiple: false)
             input(name: "groupEnabled", type: "bool", title: "Enable Group", required: true, defaultValue: true)
@@ -2670,7 +2670,7 @@ def updateCheckAllowed(){
 }
 
 def setVersion(){
-		state.version = "3.0.0-a9"	 
+		state.version = "3.0.0-a10"	 
     	state.InternalName = "BigTalker3-Child-DEV" 
 		state.ExternalName = "BigTalker3 Child-DEV"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App
