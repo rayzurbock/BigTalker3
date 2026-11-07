@@ -78,8 +78,8 @@ def pageStart(){
         }
         section("About"){
             def AboutApp = ""
-            AboutApp += "${formatHr}Big Talker is a SmartApp that can make your house talk depending on various triggered events.${formatBr}${formatBr}"
-            AboutApp += "Pair with a Hubitat compatible audio device such as Sonos, Ubi, LANnouncer, Echo, Google Home Speaker and/or VLC Thing (running on your computer or Raspberry Pi)${formatBr}"
+            AboutApp += "${formatHr}Big Talker is a SmartApp that can make your house talk depending on various triggered events — out loud through speakers, or as text on your phone.${formatBr}${formatBr}"
+            AboutApp += "Pair with a Hubitat compatible audio device such as Sonos, Ubi, LANnouncer, Echo, Google Home Speaker and/or VLC Thing (running on your computer or Raspberry Pi) for spoken announcements, or pick notification devices (Hubitat mobile app, Telegram, Pushover) to receive announcements as text.${formatBr}"
             paragraph(AboutApp)
 			updateCheck()
 			//checkButtons()
@@ -1934,7 +1934,7 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.0-a10"	 
+		state.version = "3.0.0-a11"	 
 		state.InternalName = "BigTalker3-Parent-DEV" 
 		state.ExternalName = "BigTalker3-DEV"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App
