@@ -35,7 +35,7 @@ def pageConfigureEvents(){
     initFormattingVars()
     setVersion()
     state.hubType = parent.returnVar("hubType")
-    dynamicPage(name: "pageConfigureEvents", title: "Configure Events", install: (!(app?.getInstallationState == true)), uninstall: (app?.getInstallationState == true)) {
+    dynamicPage(name: "pageConfigureEvents", title: "Configure Events", install: (app?.getInstallationState() != "COMPLETE"), uninstall: (app?.getInstallationState() == "COMPLETE")) {
         section("Group Settings:"){
             label(name: "labelRequired", title: "Event Group Name:", defaultValue: "Change this", required: true, multiple: false)
             input(name: "groupEnabled", type: "bool", title: "Enable Group", required: true, defaultValue: true)
@@ -157,7 +157,7 @@ def pageConfigMotion(){
 
     dynamicPage(name: "pageConfigMotion", title: "Configure talk on motion", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//CONFIGURATION
@@ -242,7 +242,7 @@ def pageConfigSwitch(){
             def defaultSpeechOn1 = ""
             def defaultSpeechOff1 = ""
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
             if (!switchDeviceGroup1) {
@@ -327,7 +327,7 @@ def pageConfigPresence(){
                 defaultSpeechArrive1 = "%devicename% has arrived"
                 defaultSpeechLeave1 = "%devicename% has left"
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
             }
@@ -412,7 +412,7 @@ def pageConfigLock(){
 			input name: "lockTestOnUnlock1", type: "bool", title: "${state.formatSettingOptionalStart}Toggle to test unlock phrase${state.formatSettingOptionalEnd}", required: false, defaultValue: false, submitOnChange: true
             input name: "lockTalkOnLock1", type: "text", title: "${state.formatSettingRootStart}Say this when locked:${state.formatSettingRootEnd}", required: false, defaultValue: defaultSpeechLock1
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 			input name: "lockTestOnLock1", type: "bool", title: "${state.formatSettingOptionalStart}Toggle to test lock phrase${state.formatSettingOptionalEnd}", required: false, defaultValue: false, submitOnChange: true
@@ -496,7 +496,7 @@ def pageConfigContact(){
             input name: "contactMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "contactSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 			input name: "contactAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
@@ -588,7 +588,7 @@ def pageConfigMode(){
             }
         }
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//RESTRICTIONS
@@ -620,7 +620,7 @@ def pageConfigMode(){
 def pageConfigThermostat(){
     dynamicPage(name: "pageConfigThermostat", title: "Configure talk when thermostat state is:", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -661,7 +661,7 @@ def pageConfigThermostat(){
             input name: "thermostatDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "thermostatDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -737,7 +737,7 @@ def pageConfigThermostat(){
 def pageConfigAcceleration(){
     dynamicPage(name: "pageConfigAcceleration", title: "Configure talk on acceleration", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -770,7 +770,7 @@ def pageConfigAcceleration(){
             input name: "accelerationDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "accelerationDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -818,7 +818,7 @@ def pageConfigAcceleration(){
 def pageConfigWater(){
     dynamicPage(name: "pageConfigWater", title: "Configure talk on water", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -851,7 +851,7 @@ def pageConfigWater(){
             input name: "waterDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "waterDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -899,7 +899,7 @@ def pageConfigWater(){
 def pageConfigSmoke(){
     dynamicPage(name: "pageConfigSmoke", title: "Configure talk on smoke", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -936,7 +936,7 @@ def pageConfigSmoke(){
             input name: "smokeDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "smokeDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -998,7 +998,7 @@ def pageConfigSmoke(){
 def pageConfigButton(){
     dynamicPage(name: "pageConfigButton", title: "Configure talk on button press", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -1031,7 +1031,7 @@ def pageConfigButton(){
             input name: "buttonDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "buttonDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -1080,7 +1080,7 @@ def pageConfigAlarm(){
 
     dynamicPage(name: "pageConfigAlarm", title: "Configure talk on alarm", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -1121,7 +1121,7 @@ def pageConfigAlarm(){
             input name: "alarmDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "alarmDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -1197,7 +1197,7 @@ def pageConfigFilterStatus(){
 
     dynamicPage(name: "pageConfigFilterStatus", title: "Configure talk on Filter Status change", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -1230,7 +1230,7 @@ def pageConfigFilterStatus(){
             input name: "filterStatusDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "filterStatusDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -1279,7 +1279,7 @@ def pageConfigFilterStatus(){
 def pageConfigTime(){
     dynamicPage(name: "pageConfigTime", title: "Configure talk at specific time", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section("Schedule 1"){
@@ -1340,7 +1340,7 @@ def pageConfigTime(){
             input name: "timeSlotModes3", type: "mode", title: "${state.formatSettingOptionalStart}Talk when in these mode(s) (overrides default)${state.formatSettingOptionalEnd}", multiple: true, required: false
             input name: "timeSlotDisableSwitch3", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch - Deviates from standard template
@@ -1382,7 +1382,7 @@ def pageConfigTime(){
 def pageConfigPowerMeter(){
     dynamicPage(name: "pageConfigPowerMeter", title: "Configure talk on power consumption", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -1422,7 +1422,7 @@ def pageConfigPowerMeter(){
             input name: "powerMeterDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "powerMeterDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -1492,7 +1492,7 @@ def pageConfigValve(){
         }
 		//RESTRICTIONS
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Restrictions${state.formatCenterEnd}${state.formatSettingRootEnd}"){
@@ -2631,7 +2631,7 @@ def updateCheckAllowed(){
 }
 
 def setVersion(){
-		state.version = "3.0.0-a7"	 
+		state.version = "3.0.0-a8"	 
     	state.InternalName = "BigTalker3-Child-DEV" 
 		state.ExternalName = "BigTalker3 Child-DEV"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App

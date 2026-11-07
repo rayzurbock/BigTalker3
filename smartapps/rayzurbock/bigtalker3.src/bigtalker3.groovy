@@ -119,7 +119,7 @@ def pageTalkNow(){
             if (settings.talkNowSpeechDeviceMusicPlayer) { talkNowDevs = talkNowDevs + settings.talkNowSpeechDeviceMusicPlayer }
             if (settings.talkNowSpeechDeviceSpeechSynthesis) { talkNowDevs = talkNowDevs + settings.talkNowSpeechDeviceSpeechSynthesis }
             if (settings.talkNowSpeechDeviceAudioNotification) { talkNowDevs = talkNowDevs + settings.talkNowSpeechDeviceAudioNotification }
-            if (((!(state.lastTalkNow == settings.speechTalkNow)) && (talkNowDevs)) || (settings.speechTalkNow?.contains("%askalexa%"))){
+            if (((!(state.lastTalkNow == settings.speechTalkNow)) && (talkNowDevs || settings.talkNowTextDevice)) || (settings.speechTalkNow?.contains("%askalexa%"))){
                 //Say stuff!
                 if (true) {
                 	myTalkNowResume = (myTalkNowResume == "") ? settings.resumeAudio : true //use global setting if TalkNow is not set
@@ -137,7 +137,7 @@ def pageTalkNow(){
                 //def myVoice = (!(talkNowVoice == null || talkNowVoice == "")) ? talkNowVoice : (settings?.speechVoice ? settings.speechVoice : "Sallie(en-us)")
                 def personality = false
                 LOGDEBUG ("TalkNow Voice=${myVoice}")
-                Talk("Talk Now", settings.speechTalkNow, talkNowDevs, myVolume, myTalkNowResume, personality, myVoice, customevent)
+                if (talkNowDevs || settings.speechTalkNow?.contains("%askalexa%")) { Talk("Talk Now", settings.speechTalkNow, talkNowDevs, myVolume, myTalkNowResume, personality, myVoice, customevent) }
                 Notify("Talk Now", settings.speechTalkNow, settings.talkNowTextDevice, customevent)
                 state.lastTalkNow = settings.speechTalkNow
             }
@@ -1944,7 +1944,7 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.0-a4"	 
+		state.version = "3.0.0-a5"	 
 		state.InternalName = "BigTalker3-Parent-DEV" 
 		state.ExternalName = "BigTalker3-DEV"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App
