@@ -2,7 +2,7 @@ definition(
     name: "BigTalker3-Parent",
     namespace: "rayzurbock",
     author: "rayzur@rayzurbock.com",
-    description: "Let's talk about mode changes, switches, motions, and so on.",
+    description: "Spoken and/or text announcements for mode changes, switches, motions, and more.",
     category: "Fun & Social",
 	//singleInstance: true,
     iconUrl: "https://lowrance.cc/ST/icons/BigTalker.png",
@@ -12,7 +12,6 @@ definition(
 preferences {
     page(name: "pageStart")
     page(name: "pageTalkNow")
-    page(name: "pageConfigureSpeechDeviceType")
     page(name: "pageConfigureDefaults")
     page(name: "pageHelpPhraseTokens")
 //End preferences
@@ -50,7 +49,7 @@ def pageStart(){
         section(){
         	LOGDEBUG("install state=${app.getInstallationState()}.")
             if (!(state.configOK)) { 
-                href "pageConfigureSpeechDeviceType", title:"Configure", description:"Tap to configure"
+                href "pageConfigureDefaults", title:"Configure", description:"Tap to configure"
             } else {
                 //V1Method href "pageConfigureEvents", title: "Configure Events", description: "Tap to configure events"
                 //href "pageStatus", title:"Status", description:"Tap to view status"
@@ -79,8 +78,8 @@ def pageStart(){
         }
         section("About"){
             def AboutApp = ""
-            AboutApp += "${formatHr}Big Talker is a SmartApp that can make your house talk depending on various triggered events.${formatBr}${formatBr}"
-            AboutApp += "Pair with a Hubitat compatible audio device such as Sonos, Ubi, LANnouncer, Echo, Google Home Speaker and/or VLC Thing (running on your computer or Raspberry Pi)${formatBr}"
+            AboutApp += "${formatHr}Big Talker is a SmartApp that can make your house talk depending on various triggered events — out loud through speakers, or as text on your phone.${formatBr}${formatBr}"
+            AboutApp += "Pair with a Hubitat compatible audio device such as Sonos, Ubi, LANnouncer, Echo, Google Home Speaker and/or VLC Thing (running on your computer or Raspberry Pi) for spoken announcements, or pick notification devices (Hubitat mobile app, Telegram, Pushover) to receive announcements as text.${formatBr}"
             paragraph(AboutApp)
 			updateCheck()
 			//checkButtons()
@@ -90,7 +89,7 @@ def pageStart(){
 				def DonateOptions = ""
 				DonateOptions += "Big Talker is provided to the community for free.  It takes a lot of time to build and support any complex app.  If you wish to support the time and effort put into development you may submit a donation with one of the following:${formatBr}"
 				DonateOptions += "${formatUlStart}"
-                DonateOptions += "${formatLiStart}${formatStrongStart}Cash.me${formatStrongEnd} = <a target='_blank' href='https://cash.me/\$Lowrance'>https://cash.me/\$Lowrance</a> (use a debit card, it\'s free for both of us)${formatLiEnd}"
+                DonateOptions += "${formatLiStart}${formatStrongStart}Cash App${formatStrongEnd} = <a target='_blank' href='https://cash.app/\$Lowrance'>https://cash.app/\$Lowrance</a> (use a debit card, it\'s free for both of us)${formatLiEnd}"
                 DonateOptions += "${formatLiStart}${formatStrongStart}Venmo${formatStrongEnd} = <a target='_blank' href='https://venmo.com/code?user_id=2603208862072832399'>@BrianLowrance</a>${formatLiEnd}"
                 DonateOptions += "${formatLiStart}${formatStrongStart}Paypal.me${formatStrongEnd} = <a target='_blank' href='https://paypal.me/brianlowrance'>https://paypal.me/brianlowrance</a> (They take a little since I setup my account as a business account)${formatLiEnd}"
 				paragraph(DonateOptions)					
@@ -113,12 +112,13 @@ def pageTalkNow(){
             input name: "talkNowSpeechDeviceMusicPlayer", type: "capability.musicPlayer", title: "Music players (e.g. Sonos, VLCThing)", multiple: true, required: false, submitOnChange: true
             input name: "talkNowSpeechDeviceSpeechSynthesis", type: "capability.speechSynthesis", title: "Speech speakers (e.g. Echo, Google Home, LANnouncer)", multiple: true, required: false, submitOnChange: true
             input name: "talkNowSpeechDeviceAudioNotification", type: "capability.audioNotification", title: "Audio notification devices", multiple: true, required: false, submitOnChange: true
+            input name: "talkNowTextDevice", type: "capability.notification", title: "Text Only devices (e.g. Hubitat mobile app, Telegram, Pushover)", multiple: true, required: false, submitOnChange: true
             //LOGDEBUG("previoustext=${state.lastTalkNow} New=${settings.speechTalkNow}")
             def talkNowDevs = []
             if (settings.talkNowSpeechDeviceMusicPlayer) { talkNowDevs = talkNowDevs + settings.talkNowSpeechDeviceMusicPlayer }
             if (settings.talkNowSpeechDeviceSpeechSynthesis) { talkNowDevs = talkNowDevs + settings.talkNowSpeechDeviceSpeechSynthesis }
             if (settings.talkNowSpeechDeviceAudioNotification) { talkNowDevs = talkNowDevs + settings.talkNowSpeechDeviceAudioNotification }
-            if (((!(state.lastTalkNow == settings.speechTalkNow)) && (talkNowDevs)) || (settings.speechTalkNow?.contains("%askalexa%"))){
+            if (((!(state.lastTalkNow == settings.speechTalkNow)) && (talkNowDevs || settings.talkNowTextDevice)) || (settings.speechTalkNow?.contains("%askalexa%"))){
                 //Say stuff!
                 if (true) {
                 	myTalkNowResume = (myTalkNowResume == "") ? settings.resumeAudio : true //use global setting if TalkNow is not set
@@ -136,7 +136,8 @@ def pageTalkNow(){
                 //def myVoice = (!(talkNowVoice == null || talkNowVoice == "")) ? talkNowVoice : (settings?.speechVoice ? settings.speechVoice : "Sallie(en-us)")
                 def personality = false
                 LOGDEBUG ("TalkNow Voice=${myVoice}")
-                Talk("Talk Now", settings.speechTalkNow, talkNowDevs, myVolume, myTalkNowResume, personality, myVoice, customevent)
+                if (talkNowDevs || settings.speechTalkNow?.contains("%askalexa%")) { Talk("Talk Now", settings.speechTalkNow, talkNowDevs, myVolume, myTalkNowResume, personality, myVoice, customevent) }
+                Notify("Talk Now", settings.speechTalkNow, settings.talkNowTextDevice, customevent)
                 state.lastTalkNow = settings.speechTalkNow
             }
         }
@@ -200,24 +201,6 @@ def pageHelpPhraseTokens(){
    }
 }
 
-def pageConfigureSpeechDeviceType(){
-	def myNextPage = ""
-    if (!(state?.installed == true)) { state.installed = false; state.speechDeviceType = "auto"; myNextPage = "pageConfigureDefaults"}
-    dynamicPage(name: "pageConfigureSpeechDeviceType", title: "Configure", nextPage: myNextPage, install: false, uninstall: false) {
-        //section ("Speech Device Type Support"){
-        section (){
-			if (state.installed == true) { 
-				paragraph "<font color=red><strong>PROCEED WITH CAUTION!</strong></font>\n<font color=red><strong>WARNING!</strong></font> If you change this setting after the app has been configured, you will need to update your selected default and custom speech devices!\n <strong>To Cancel:</strong> Don't move the switch and press Next (or Done)\n<font color=red><strong>PROCEED WITH CAUTION!</strong></font>"
-			}
-            paragraph "${app.label} supports music players, speech speakers, and audio notification devices together -- no mode switching needed."
-            paragraph "'Music Player' typically supports devices such as Sonos, VLCThing.\n'Speech Synthesis' typically supports devices such as Google Home Speaker, Echo, Ubi and LANnouncer.\n'Audio Notification' supports devices that can play a notification track directly.\n\nBig Talker automatically uses the correct audio capability for each device you select -- no mode switching needed."
-            state.speechDeviceType = "auto"
-            //paragraph "Click Next to continue configuration...\n"
-        }
-    }
-//End pageConfigureSpeechDeviceType()
-}
-
 def pageConfigureDefaults(){
 	unsubscribe()
 	myRunIn(3, initSubscribe)
@@ -232,6 +215,10 @@ def pageConfigureDefaults(){
             //nextPage:  "pageConfigureEvents"
         ]
     } else {
+       //During initial setup this is the install page. NOTE: Hubitat's Done button
+       //always returns to the Apps list (nextPage does not redirect it -- verified
+       //2026-11-06 on a fresh install), so the page tells the user to reopen the
+       //app from Apps to reach the main menu and add Event Groups.
        state.dynPageProperties = [
             name:      "pageConfigureDefaults",
             title:     "Configure Defaults",
@@ -245,6 +232,10 @@ def pageConfigureDefaults(){
            input "speechDeviceDefaultMusicPlayer", "capability.musicPlayer", title: "Music players (default, e.g. Sonos, VLCThing)", multiple: true, required: false, submitOnChange: false
            input "speechDeviceDefaultSpeechSynthesis", "capability.speechSynthesis", title: "Speech speakers (default, e.g. Echo, Google Home, LANnouncer)", multiple: true, required: false, submitOnChange: false
            input "speechDeviceDefaultAudioNotification", "capability.audioNotification", title: "Audio notification devices (default)", multiple: true, required: false, submitOnChange: false
+        }
+        section("${state.formatSettingRootStart}Text Only (default):${state.formatSettingRootEnd}"){
+            paragraph "Notification devices receive a text copy of announcements (e.g. Hubitat mobile app, Telegram, Pushover). Pick them here as the app default; each event group and device type can override this."
+            input "textDeviceDefault", "capability.notification", title: "Text Only devices (default)", multiple: true, required: false, submitOnChange: false
         }
         if (true) {
             section ("${state.formatSettingRootStart}Adjust volume during announcement <I>(optional; Supports: Sonos, VLC-Thing):${state.formatSettingRootEnd}"){
@@ -284,6 +275,11 @@ def pageConfigureDefaults(){
 			} else if (state?.debugMode == null) {
 				state.debugMode = (debugmode == true)
 			}
+        }
+        if (!(state?.installed == true)) {
+            section("What's next?"){
+                paragraph "After tapping Done, Hubitat returns you to the Apps list — that's normal. Reopen <strong>BigTalker</strong> from your Apps list and you'll land on the main menu, where you can add your Event Groups."
+            }
         }
     }
 }
@@ -1075,6 +1071,31 @@ private def myRunIn(delay_s, func) {
     }
 }
 
+def Notify(appname, phrase, customTextDevices, evt){
+    //Text Only announcements: the same phrase as speech, delivered as text to notification devices (Hubitat mobile app, Telegram, Pushover, etc.)
+    def devices = customTextDevices ?: getDefaultTextDevices()
+    if (!devices) { return }
+    if (phrase == null || phrase == "") { return }
+    def text = processPhraseVariables(appname, phrase, evt, null)
+    if (text == null || text == "") { return }
+    if (text.toLowerCase().contains(".mp3") || text.toLowerCase().contains("%askalexa%")) {
+        LOGDEBUG("Notify: phrase is audio-only (MP3/AskAlexa); skipping text notification", true)
+        return
+    }
+    devices.each { d ->
+        try {
+            if (d.hasCommand("deviceNotification")) {
+                d.deviceNotification(text)
+                LOGTRACE("NOTIFY(${appname})|${d.displayName} >> ${text}")
+            } else {
+                LOGERROR("Notify: ${d.displayName} does not support deviceNotification - skipped.")
+            }
+        } catch (ex) {
+            LOGERROR("Notify: failed to send text to ${d.displayName}: ${ex}")
+        }
+    }
+}
+
 def TalkQueue(appname, phrase, customSpeechDevice, volume, resume, personality, voice, evt){
     //IN DEVELOPMENT
     // Already talking or just recently (within x seconds) started talking
@@ -1367,6 +1388,13 @@ def getDefaultSpeechDevices(){
     if (settings?.speechDeviceDefaultMusicPlayer) { devs = devs + settings.speechDeviceDefaultMusicPlayer }
     if (settings?.speechDeviceDefaultSpeechSynthesis) { devs = devs + settings.speechDeviceDefaultSpeechSynthesis }
     if (settings?.speechDeviceDefaultAudioNotification) { devs = devs + settings.speechDeviceDefaultAudioNotification }
+    return devs
+}
+
+def getDefaultTextDevices(){
+    //Default Text Only devices picked in the app defaults page
+    def devs = []
+    if (settings?.textDeviceDefault) { devs = devs + settings.textDeviceDefault }
     return devs
 }
 
@@ -1906,7 +1934,7 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.0"	 
+		state.version = "3.0.1"	 
 		state.InternalName = "BigTalker3-Parent" 
 		state.ExternalName = "BigTalker3"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App

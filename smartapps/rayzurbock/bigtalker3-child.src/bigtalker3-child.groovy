@@ -35,15 +35,17 @@ def pageConfigureEvents(){
     initFormattingVars()
     setVersion()
     state.hubType = parent.returnVar("hubType")
-    dynamicPage(name: "pageConfigureEvents", title: "Configure Events", install: (!(app?.getInstallationState == true)), uninstall: (app?.getInstallationState == true)) {
+    dynamicPage(name: "pageConfigureEvents", title: "Configure Events", install: true, uninstall: true) {
         section("Group Settings:"){
             label(name: "labelRequired", title: "Event Group Name:", defaultValue: "Change this", required: true, multiple: false)
             input(name: "groupEnabled", type: "bool", title: "Enable Group", required: true, defaultValue: true)
             paragraph "Speech devices of all types (music players, speech speakers, audio notification devices) can be used together. Each device will receive only the actions it supports."
             input name: "testGroupNow", type: "bool", title: "Toggle to speak a test phrase for this group", required: false, defaultValue: false, submitOnChange: true
+            input name: "groupTextDevice", type: "capability.notification", title: "Text Only devices for this group (overrides app default; e.g. Hubitat mobile app, Telegram, Pushover)", multiple: true, required: false, submitOnChange: true
             if (settings?.testGroupNow == true && state?.lastTestGroupNow != true) {
                 state.lastTestGroupNow = true
                 sendTalk(app.label, "${app.label} event group is working correctly.", null, getDesiredVolume(null), false, false, getMyVoice(null), [displayName: "BigTalker Test", name: "EventGroupTest", value: "test", descriptionText: "Event group test"])
+                sendText(app.label, "${app.label} event group is working correctly.", settings.groupTextDevice, [displayName: "BigTalker Test", name: "EventGroupTest", value: "test", descriptionText: "Event group test"])
             } else if (settings?.testGroupNow != true) {
                 state.lastTestGroupNow = false
             }
@@ -156,7 +158,7 @@ def pageConfigMotion(){
 
     dynamicPage(name: "pageConfigMotion", title: "Configure talk on motion", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//CONFIGURATION
@@ -176,6 +178,7 @@ def pageConfigMotion(){
             input name: "motionMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false, submitOnChange: true
 			input name: "motionSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false, submitOnChange: true
 			input name: "motionAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false, submitOnChange: true
+			input name: "motionTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "motionVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false, submitOnChange: true
             	input name: "motionResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true, submitOnChange: true
@@ -204,6 +207,7 @@ def pageConfigMotion(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Inactive"
@@ -213,6 +217,7 @@ def pageConfigMotion(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -240,7 +245,7 @@ def pageConfigSwitch(){
             def defaultSpeechOn1 = ""
             def defaultSpeechOff1 = ""
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
             if (!switchDeviceGroup1) {
@@ -256,6 +261,7 @@ def pageConfigSwitch(){
             input name: "switchMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false, submitOnChange: true
 			input name: "switchSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false, submitOnChange: true
 			input name: "switchAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false, submitOnChange: true
+			input name: "switchTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "switchVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false, submitOnChange: true
             	input name: "switchResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true, submitOnChange: true
@@ -284,6 +290,7 @@ def pageConfigSwitch(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Off"
@@ -293,6 +300,7 @@ def pageConfigSwitch(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -324,7 +332,7 @@ def pageConfigPresence(){
                 defaultSpeechArrive1 = "%devicename% has arrived"
                 defaultSpeechLeave1 = "%devicename% has left"
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
             }
@@ -337,6 +345,7 @@ def pageConfigPresence(){
             input name: "presenceMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalEnd}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "presenceSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalEnd}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 			input name: "presenceAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalEnd}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
+			input name: "presenceTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "presenceVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false
             	input name: "presenceResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true
@@ -364,6 +373,7 @@ def pageConfigPresence(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Not present"
@@ -373,6 +383,7 @@ def pageConfigPresence(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -408,7 +419,7 @@ def pageConfigLock(){
 			input name: "lockTestOnUnlock1", type: "bool", title: "${state.formatSettingOptionalStart}Toggle to test unlock phrase${state.formatSettingOptionalEnd}", required: false, defaultValue: false, submitOnChange: true
             input name: "lockTalkOnLock1", type: "text", title: "${state.formatSettingRootStart}Say this when locked:${state.formatSettingRootEnd}", required: false, defaultValue: defaultSpeechLock1
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 			input name: "lockTestOnLock1", type: "bool", title: "${state.formatSettingOptionalStart}Toggle to test lock phrase${state.formatSettingOptionalEnd}", required: false, defaultValue: false, submitOnChange: true
@@ -416,6 +427,7 @@ def pageConfigLock(){
             input name: "lockMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "lockSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 			input name: "lockAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
+			input name: "lockTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "lockVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false
             	input name: "lockResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true
@@ -443,6 +455,7 @@ def pageConfigLock(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Unlock"
@@ -452,6 +465,7 @@ def pageConfigLock(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -491,10 +505,11 @@ def pageConfigContact(){
             input name: "contactMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "contactSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 			input name: "contactAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
+			input name: "contactTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "contactVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false
                 input name: "contactResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true
@@ -523,6 +538,7 @@ def pageConfigContact(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Closed"
@@ -532,6 +548,7 @@ def pageConfigContact(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -574,6 +591,7 @@ def pageConfigMode(){
             input name: "modePhraseMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "modePhraseSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 			input name: "modePhraseAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
+			input name: "modePhraseTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "modePhraseVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false
                 input name: "modePhraseResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true
@@ -581,7 +599,7 @@ def pageConfigMode(){
             }
         }
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//RESTRICTIONS
@@ -604,6 +622,7 @@ def pageConfigMode(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
     }
@@ -613,7 +632,7 @@ def pageConfigMode(){
 def pageConfigThermostat(){
     dynamicPage(name: "pageConfigThermostat", title: "Configure talk when thermostat state is:", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -640,6 +659,7 @@ def pageConfigThermostat(){
             input name: "thermostatMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "thermostatSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 			input name: "thermostatAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
+			input name: "thermostatTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "thermostatVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false
             	input name: "thermostatResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true
@@ -653,7 +673,7 @@ def pageConfigThermostat(){
             input name: "thermostatDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "thermostatDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -669,6 +689,7 @@ def pageConfigThermostat(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Heating"
@@ -678,6 +699,7 @@ def pageConfigThermostat(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Cooling"
@@ -687,6 +709,7 @@ def pageConfigThermostat(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Fanonly"
@@ -696,6 +719,7 @@ def pageConfigThermostat(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -729,7 +753,7 @@ def pageConfigThermostat(){
 def pageConfigAcceleration(){
     dynamicPage(name: "pageConfigAcceleration", title: "Configure talk on acceleration", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -748,6 +772,7 @@ def pageConfigAcceleration(){
             input name: "accelerationMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "accelerationSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 			input name: "accelerationAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
+			input name: "accelerationTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "accelerationVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false
             	input name: "accelerationResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true
@@ -761,7 +786,7 @@ def pageConfigAcceleration(){
             input name: "accelerationDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "accelerationDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -777,6 +802,7 @@ def pageConfigAcceleration(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Inactive"
@@ -786,6 +812,7 @@ def pageConfigAcceleration(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -809,7 +836,7 @@ def pageConfigAcceleration(){
 def pageConfigWater(){
     dynamicPage(name: "pageConfigWater", title: "Configure talk on water", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -828,6 +855,7 @@ def pageConfigWater(){
             input name: "waterMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "waterSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 			input name: "waterAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
+			input name: "waterTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "waterVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false
                 input name: "waterResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true
@@ -841,7 +869,7 @@ def pageConfigWater(){
             input name: "waterDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "waterDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -857,6 +885,7 @@ def pageConfigWater(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Dry"
@@ -866,6 +895,7 @@ def pageConfigWater(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -889,7 +919,7 @@ def pageConfigWater(){
 def pageConfigSmoke(){
     dynamicPage(name: "pageConfigSmoke", title: "Configure talk on smoke", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -912,6 +942,7 @@ def pageConfigSmoke(){
             input name: "smokeMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "smokeSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 			input name: "smokeAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
+			input name: "smokeTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "smokeVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false
                 input name: "smokeResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true
@@ -925,7 +956,7 @@ def pageConfigSmoke(){
             input name: "smokeDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "smokeDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -941,6 +972,7 @@ def pageConfigSmoke(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Clear"
@@ -950,6 +982,7 @@ def pageConfigSmoke(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Tested"
@@ -959,6 +992,7 @@ def pageConfigSmoke(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -987,7 +1021,7 @@ def pageConfigSmoke(){
 def pageConfigButton(){
     dynamicPage(name: "pageConfigButton", title: "Configure talk on button press", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -1006,6 +1040,7 @@ def pageConfigButton(){
             input name: "buttonMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "buttonSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 			input name: "buttonAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
+			input name: "buttonTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "buttonVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false
                 input name: "buttonResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true
@@ -1019,7 +1054,7 @@ def pageConfigButton(){
             input name: "buttonDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "buttonDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -1035,6 +1070,7 @@ def pageConfigButton(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Held"
@@ -1044,6 +1080,7 @@ def pageConfigButton(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -1068,7 +1105,7 @@ def pageConfigAlarm(){
 
     dynamicPage(name: "pageConfigAlarm", title: "Configure talk on alarm", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -1095,6 +1132,7 @@ def pageConfigAlarm(){
             input name: "alarmMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "alarmSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 			input name: "alarmAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
+			input name: "alarmTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "alarmVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false
                 input name: "alarmResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true
@@ -1108,7 +1146,7 @@ def pageConfigAlarm(){
             input name: "alarmDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "alarmDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -1124,6 +1162,7 @@ def pageConfigAlarm(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Both"
@@ -1133,6 +1172,7 @@ def pageConfigAlarm(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Siren"
@@ -1141,6 +1181,7 @@ def pageConfigAlarm(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Strobe"
@@ -1150,6 +1191,7 @@ def pageConfigAlarm(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -1184,7 +1226,7 @@ def pageConfigFilterStatus(){
 
     dynamicPage(name: "pageConfigFilterStatus", title: "Configure talk on Filter Status change", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -1203,6 +1245,7 @@ def pageConfigFilterStatus(){
             input name: "filterStatusMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "filterStatusSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 			input name: "filterStatusAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
+			input name: "filterStatusTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "filterStatusVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false
                 input name: "filterStatusResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true
@@ -1216,7 +1259,7 @@ def pageConfigFilterStatus(){
             input name: "filterStatusDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "filterStatusDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -1232,6 +1275,7 @@ def pageConfigFilterStatus(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Replace"
@@ -1241,6 +1285,7 @@ def pageConfigFilterStatus(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -1265,7 +1310,7 @@ def pageConfigFilterStatus(){
 def pageConfigTime(){
     dynamicPage(name: "pageConfigTime", title: "Configure talk at specific time", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section("Schedule 1"){
@@ -1277,6 +1322,7 @@ def pageConfigTime(){
             input name: "timeSlotMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "timeSlotSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 			input name: "timeSlotAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
+			input name: "timeSlotTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "timeSlotVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false
                 input name: "timeSlotResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true
@@ -1325,7 +1371,7 @@ def pageConfigTime(){
             input name: "timeSlotModes3", type: "mode", title: "${state.formatSettingOptionalStart}Talk when in these mode(s) (overrides default)${state.formatSettingOptionalEnd}", multiple: true, required: false
             input name: "timeSlotDisableSwitch3", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch - Deviates from standard template
@@ -1341,6 +1387,7 @@ def pageConfigTime(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState}", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState}", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState}" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState}" //capture toggle switch state
         }
 		phraseTestTogState = "Time2"
@@ -1350,6 +1397,7 @@ def pageConfigTime(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice2") { myVoice = settings?."${phraseTestTogDeviceLower}Voice2" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState}", getCombinedSpeechDevices(phraseTestTogDeviceLower, 2), settings."${phraseTestTogDeviceLower}Volume2", settings."${phraseTestTogDeviceLower}ResumePlay2", settings."${phraseTestTogDeviceLower}Personality2", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState}", getCombinedTextDevices(phraseTestTogDeviceLower, 2), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState}" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState}" //capture toggle switch state
         }
 		phraseTestTogState = "Time3"
@@ -1359,6 +1407,7 @@ def pageConfigTime(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice3") { myVoice = settings?."${phraseTestTogDeviceLower}Voice3" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState}", getCombinedSpeechDevices(phraseTestTogDeviceLower, 3), settings."${phraseTestTogDeviceLower}Volume3", settings."${phraseTestTogDeviceLower}ResumePlay3", settings."${phraseTestTogDeviceLower}Personality3", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState}", getCombinedTextDevices(phraseTestTogDeviceLower, 3), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState}" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState}" //capture toggle switch state
         }
     }
@@ -1367,7 +1416,7 @@ def pageConfigTime(){
 def pageConfigPowerMeter(){
     dynamicPage(name: "pageConfigPowerMeter", title: "Configure talk on power consumption", install: false, uninstall: false) {
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section(){
@@ -1393,6 +1442,7 @@ def pageConfigPowerMeter(){
             input name: "powerMeterMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false
 			input name: "powerMeterSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false
 			input name: "powerMeterAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false
+			input name: "powerMeterTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "powerMeterVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false
                 input name: "powerMeterResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true
@@ -1406,7 +1456,7 @@ def pageConfigPowerMeter(){
             input name: "powerMeterDays1", type: "enum", title: "${state.formatSettingOptionalStart}Restrict to these day(s)${state.formatSettingOptionalEnd}", required: false, options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], multiple: true
             input name: "powerMeterDisableSwitch1", type: "capability.switch", title: "${state.formatSettingOptionalStart}Disable when this switch is off${state.formatSettingOptionalEnd}", required: false, multiple: false
         }
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
 		//Test Phrase Toggle Switch
@@ -1422,6 +1472,7 @@ def pageConfigPowerMeter(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Fall"
@@ -1431,6 +1482,7 @@ def pageConfigPowerMeter(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Normal"
@@ -1440,6 +1492,7 @@ def pageConfigPowerMeter(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
     }
@@ -1467,6 +1520,7 @@ def pageConfigValve(){
             input name: "valveMusicPlayerDevice1", type: "capability.musicPlayer", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Music players (e.g. Sonos, VLCThing)", multiple: true, required: false, submitOnChange: true
 			input name: "valveSpeechSynthesisDevice1", type: "capability.speechSynthesis", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Speech speakers (e.g. Echo, Google Home, LANnouncer, VLCThing)", multiple: true, required: false, submitOnChange: true
 			input name: "valveAudioNotificationDevice1", type: "capability.audioNotification", title: "${state.formatSettingOptionalStart}Talk with these text-to-speech devices (overrides default)${state.formatSettingOptionalEnd} - Devices that play notification tracks directly", multiple: true, required: false, submitOnChange: true
+			input name: "valveTextDevice1", type: "capability.notification", title: "${state.formatSettingOptionalStart}Text Only devices (overrides group/app default) - notification devices (e.g. Hubitat mobile app, Telegram, Pushover)${state.formatSettingOptionalEnd}", multiple: true, required: false, submitOnChange: true
             if (true) {
             	input name: "valveVolume1", type: "number", title: "${state.formatSettingOptionalStart}Set volume to (overrides default):${state.formatSettingOptionalEnd}", required: false, submitOnChange: true
             	input name: "valveResumePlay1", type: "bool", title: "${state.formatSettingOptionalStart}Attempt to resume playing audio?${state.formatSettingOptionalEnd}", required: false, defaultValue: (parent.returnVar("resumePlay") == false) ? false : true, submitOnChange: true
@@ -1475,7 +1529,7 @@ def pageConfigValve(){
         }
 		//RESTRICTIONS
 		//HELP
-        section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
+        section("${state.formatSettingRootStart}${state.formatCenterStart}Help${state.formatCenterEnd}${state.formatSettingRootEnd}"){
             href "pageHelpPhraseTokens", title:"Phrase Tokens", description:"Tap for a list of phrase tokens"
         }
         section("${state.formatBr}${state.formatHr}${state.formatHr}${state.formatSettingRootStart}${state.formatCenterStart}Restrictions${state.formatCenterEnd}${state.formatSettingRootEnd}"){
@@ -1498,6 +1552,7 @@ def pageConfigValve(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Closed"
@@ -1507,6 +1562,7 @@ def pageConfigValve(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -1976,19 +2032,19 @@ def announceEvent(deviceType, index, deviceStates, evt, myVoice){
 	if (settings?."${deviceType}Personality${index}" == "No") {personality = false}
     if (evt.value == deviceState1) {
 		state.TalkPhrase = settings."${deviceType}TalkOn${deviceState1.replace(' ','').capitalize()}${index}"; state.speechDevice = getCombinedSpeechDevices(deviceType, index); myVolume = getDesiredVolume(settings."${deviceType}Volume${index}")
-        if (!(state?.TalkPhrase == null)) {sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume, resume, personality, myVoice, evt)} else {LOGDEBUG("Not configured to speak for this event (${evt.value} <> ${deviceState1})", true)}
+        if (!(state?.TalkPhrase == null)) {sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume, resume, personality, myVoice, evt); sendText(app.label, state.TalkPhrase, getCombinedTextDevices(deviceType, index), evt)} else {LOGDEBUG("Not configured to speak for this event (${evt.value} <> ${deviceState1})", true)}
     }
     if (evt.value == deviceState2) {
         state.TalkPhrase = settings."${deviceType}TalkOn${deviceState2.replace(' ','').capitalize()}${index}"; state.speechDevice = getCombinedSpeechDevices(deviceType, index); myVolume = getDesiredVolume(settings."${deviceType}Volume${index}")
-        if (!(state?.TalkPhrase == null)) {sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume, resume, personality, myVoice, evt)} else {LOGDEBUG("Not configured to speak for this event (${evt.value} <> ${deviceState2})", true)}
+        if (!(state?.TalkPhrase == null)) {sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume, resume, personality, myVoice, evt); sendText(app.label, state.TalkPhrase, getCombinedTextDevices(deviceType, index), evt)} else {LOGDEBUG("Not configured to speak for this event (${evt.value} <> ${deviceState2})", true)}
     }
 	if (evt.value == deviceState3) {
         state.TalkPhrase = settings."${deviceType}TalkOn${deviceState3.replace(' ','').capitalize()}${index}"; state.speechDevice = getCombinedSpeechDevices(deviceType, index); myVolume = getDesiredVolume(settings."${deviceType}Volume${index}")
-        if (!(state?.TalkPhrase == null)) {sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume, resume, personality, myVoice, evt)} else {LOGDEBUG("Not configured to speak for this event (${evt.value} <> ${deviceState3})", true)}
+        if (!(state?.TalkPhrase == null)) {sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume, resume, personality, myVoice, evt); sendText(app.label, state.TalkPhrase, getCombinedTextDevices(deviceType, index), evt)} else {LOGDEBUG("Not configured to speak for this event (${evt.value} <> ${deviceState3})", true)}
     }
 	if (evt.value == deviceState4) {
         state.TalkPhrase = settings."${deviceType}TalkOn${deviceState4.replace(' ','').capitalize()}${index}"; state.speechDevice = getCombinedSpeechDevices(deviceType, index); myVolume = getDesiredVolume(settings."${deviceType}Volume${index}")
-        if (!(state?.TalkPhrase == null)) {sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume, resume, personality, myVoice, evt)} else {LOGDEBUG("Not configured to speak for this event (${evt.value} <> ${deviceState3})", true)}
+        if (!(state?.TalkPhrase == null)) {sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume, resume, personality, myVoice, evt); sendText(app.label, state.TalkPhrase, getCombinedTextDevices(deviceType, index), evt)} else {LOGDEBUG("Not configured to speak for this event (${evt.value} <> ${deviceState3})", true)}
     }
     state.TalkPhrase = null
     state.speechDevice = null
@@ -2145,7 +2201,7 @@ def processModeChangeEvent(index, evt){
                 state.TalkPhrase = null
                 state.speechDevice = null
                 state.TalkPhrase = settings.modeTalkOnChange1; state.speechDevice = getCombinedSpeechDevices("modePhrase", 1); myVolume = getDesiredVolume(settings.modePhraseVolume1)
-                if (!(state?.TalkPhrase == null)) {sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume, resume, personality, myVoice, evt)} else {LOGDEBUG("Not configured to speak for this event", true)}
+                if (!(state?.TalkPhrase == null)) {sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume, resume, personality, myVoice, evt); sendText(app.label, state.TalkPhrase, getCombinedTextDevices("modePhrase", index), evt)} else {LOGDEBUG("Not configured to speak for this event", true)}
                 state.TalkPhrase = null
                 state.speechDevice = null
             } else {
@@ -2157,7 +2213,7 @@ def processModeChangeEvent(index, evt){
             state.TalkPhrase = null
             state.speechDevice = null
             state.TalkPhrase = settings.modeTalkOnChange1; state.speechDevice = getCombinedSpeechDevices("modePhrase", 1); myVolume = getDesiredVolume(settings.modePhraseVolume1)
-            if (!(state?.TalkPhrase == null)) {sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume, resume, personality, myVoice, evt)} else {LOGDEBUG("Not configured to speak for this event", true)}
+            if (!(state?.TalkPhrase == null)) {sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume, resume, personality, myVoice, evt); sendText(app.label, state.TalkPhrase, getCombinedTextDevices("modePhrase", index), evt)} else {LOGDEBUG("Not configured to speak for this event", true)}
             state.TalkPhrase = null
             state.speechDevice = null
         }
@@ -2265,6 +2321,7 @@ def processPowerMeterEvent(index, evt){
     		state.TalkPhrase = state.TalkPhrase.replaceAll(/(?i)\%value\%/, powerLevel)
     	}
     	sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume, resume, personality, myVoice, evt)
+    	sendText(app.label, state.TalkPhrase, getCombinedTextDevices("powerMeter", index), evt)
     } else {
     	LOGDEBUG("Not configured to speak for this event", true)
     }
@@ -2318,6 +2375,7 @@ def processScheduledEvent(index, eventtime, alloweddays){
 	if (index == 3) { state.TalkPhrase = settings.timeSlotTalkOnTime3; state.speechDevice = getCombinedSpeechDevices("timeSlot", 3); myVolume = getDesiredVolume(settings.timeSlotVolume3) }
 	def customevent = [displayName: 'BigTalker:OnSchedule', name: 'OnSchedule', value: "${todayStr}@${timeNow}"]
 	sendTalk(app.label,state.TalkPhrase, state.speechDevice, myVolume,resume, personality, myVoice, customevent)
+		sendText(app.label, state.TalkPhrase, getCombinedTextDevices("timeSlot", index), customevent)
 	state.TalkPhrase = null
     state.speechDevice = null
 }
@@ -2399,6 +2457,19 @@ def getCombinedSpeechDevices(devicePrefix, index = 1){
     if (settings."${devicePrefix}SpeechSynthesisDevice${index}") { devs = devs + settings."${devicePrefix}SpeechSynthesisDevice${index}" }
     if (settings."${devicePrefix}AudioNotificationDevice${index}") { devs = devs + settings."${devicePrefix}AudioNotificationDevice${index}" }
     return devs
+}
+
+def getCombinedTextDevices(devicePrefix, index = 1){
+    //Text Only devices: per-type pickers first, then group-level; app defaults are applied by parent.Notify when both are empty
+    def devs = []
+    if (settings."${devicePrefix}TextDevice${index}") { devs = devs + settings."${devicePrefix}TextDevice${index}" }
+    if (devs.isEmpty() && settings.groupTextDevice) { devs = devs + settings.groupTextDevice }
+    return devs
+}
+
+def sendText(appname, phrase, customTextDevice, evt){
+    LOGDEBUG("parent.Notify(app=Me,customdevice=${customTextDevice},phrase=${phrase})", false)
+	parent.Notify(appname, phrase, customTextDevice, evt)
 }
 
 def sendTalk(appname, phrase, customSpeechDevice, volume, resume, personality, voice, evt, mode = "auto"){
@@ -2599,7 +2670,7 @@ def updateCheckAllowed(){
 }
 
 def setVersion(){
-		state.version = "3.0.0"	 
+		state.version = "3.0.1"	 
     	state.InternalName = "BigTalker3-Child" 
 		state.ExternalName = "BigTalker3 Child"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App
