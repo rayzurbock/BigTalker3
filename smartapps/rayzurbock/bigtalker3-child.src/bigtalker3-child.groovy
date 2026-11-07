@@ -45,6 +45,7 @@ def pageConfigureEvents(){
             if (settings?.testGroupNow == true && state?.lastTestGroupNow != true) {
                 state.lastTestGroupNow = true
                 sendTalk(app.label, "${app.label} event group is working correctly.", null, getDesiredVolume(null), false, false, getMyVoice(null), [displayName: "BigTalker Test", name: "EventGroupTest", value: "test", descriptionText: "Event group test"])
+                sendText(app.label, "${app.label} event group is working correctly.", settings.groupTextDevice, [displayName: "BigTalker Test", name: "EventGroupTest", value: "test", descriptionText: "Event group test"])
             } else if (settings?.testGroupNow != true) {
                 state.lastTestGroupNow = false
             }
@@ -206,6 +207,7 @@ def pageConfigMotion(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Inactive"
@@ -215,6 +217,7 @@ def pageConfigMotion(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -287,6 +290,7 @@ def pageConfigSwitch(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Off"
@@ -296,6 +300,7 @@ def pageConfigSwitch(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -368,6 +373,7 @@ def pageConfigPresence(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Not present"
@@ -377,6 +383,7 @@ def pageConfigPresence(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -448,6 +455,7 @@ def pageConfigLock(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Unlock"
@@ -457,6 +465,7 @@ def pageConfigLock(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -529,6 +538,7 @@ def pageConfigContact(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Closed"
@@ -538,6 +548,7 @@ def pageConfigContact(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -611,6 +622,7 @@ def pageConfigMode(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
     }
@@ -677,6 +689,7 @@ def pageConfigThermostat(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Heating"
@@ -686,6 +699,7 @@ def pageConfigThermostat(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Cooling"
@@ -695,6 +709,7 @@ def pageConfigThermostat(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Fanonly"
@@ -704,6 +719,7 @@ def pageConfigThermostat(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -786,6 +802,7 @@ def pageConfigAcceleration(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Inactive"
@@ -795,6 +812,7 @@ def pageConfigAcceleration(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -867,6 +885,7 @@ def pageConfigWater(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Dry"
@@ -876,6 +895,7 @@ def pageConfigWater(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -952,6 +972,7 @@ def pageConfigSmoke(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Clear"
@@ -961,6 +982,7 @@ def pageConfigSmoke(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Tested"
@@ -970,6 +992,7 @@ def pageConfigSmoke(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -1047,6 +1070,7 @@ def pageConfigButton(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Held"
@@ -1056,6 +1080,7 @@ def pageConfigButton(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -1137,6 +1162,7 @@ def pageConfigAlarm(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Both"
@@ -1146,6 +1172,7 @@ def pageConfigAlarm(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Siren"
@@ -1154,6 +1181,7 @@ def pageConfigAlarm(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Strobe"
@@ -1163,6 +1191,7 @@ def pageConfigAlarm(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -1246,6 +1275,7 @@ def pageConfigFilterStatus(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Replace"
@@ -1255,6 +1285,7 @@ def pageConfigFilterStatus(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -1356,6 +1387,7 @@ def pageConfigTime(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState}", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState}", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState}" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState}" //capture toggle switch state
         }
 		phraseTestTogState = "Time2"
@@ -1365,6 +1397,7 @@ def pageConfigTime(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice2") { myVoice = settings?."${phraseTestTogDeviceLower}Voice2" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState}", getCombinedSpeechDevices(phraseTestTogDeviceLower, 2), settings."${phraseTestTogDeviceLower}Volume2", settings."${phraseTestTogDeviceLower}ResumePlay2", settings."${phraseTestTogDeviceLower}Personality2", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState}", getCombinedTextDevices(phraseTestTogDeviceLower, 2), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState}" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState}" //capture toggle switch state
         }
 		phraseTestTogState = "Time3"
@@ -1374,6 +1407,7 @@ def pageConfigTime(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice3") { myVoice = settings?."${phraseTestTogDeviceLower}Voice3" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState}", getCombinedSpeechDevices(phraseTestTogDeviceLower, 3), settings."${phraseTestTogDeviceLower}Volume3", settings."${phraseTestTogDeviceLower}ResumePlay3", settings."${phraseTestTogDeviceLower}Personality3", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState}", getCombinedTextDevices(phraseTestTogDeviceLower, 3), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState}" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState}" //capture toggle switch state
         }
     }
@@ -1438,6 +1472,7 @@ def pageConfigPowerMeter(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Fall"
@@ -1447,6 +1482,7 @@ def pageConfigPowerMeter(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Normal"
@@ -1456,6 +1492,7 @@ def pageConfigPowerMeter(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
     }
@@ -1515,6 +1552,7 @@ def pageConfigValve(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		phraseTestTogState = "Closed"
@@ -1524,6 +1562,7 @@ def pageConfigValve(){
             myVoice = parent.returnVar("speechVoice")
 			if (settings?."${phraseTestTogDeviceLower}Voice1") { myVoice = settings?."${phraseTestTogDeviceLower}Voice1" }
 			sendTalk(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedSpeechDevices(phraseTestTogDeviceLower, 1), settings."${phraseTestTogDeviceLower}Volume1", settings."${phraseTestTogDeviceLower}ResumePlay1", settings."${phraseTestTogDeviceLower}Personality1", myVoice, testEvent)
+			sendText(app.label, settings."${phraseTestTogDeviceLower}TalkOn${phraseTestTogState.replace(' ','')}1", getCombinedTextDevices(phraseTestTogDeviceLower, 1), testEvent)
 			state."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" = settings."${phraseTestTogDeviceLower}TestOn${phraseTestTogState.replace(' ','')}1" //capture toggle switch state
         }
 		//DELAYED / REPEATED ANNOUNCEMENTS
@@ -2631,7 +2670,7 @@ def updateCheckAllowed(){
 }
 
 def setVersion(){
-		state.version = "3.0.0-a8"	 
+		state.version = "3.0.0-a9"	 
     	state.InternalName = "BigTalker3-Child-DEV" 
 		state.ExternalName = "BigTalker3 Child-DEV"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App
