@@ -234,15 +234,15 @@ def pageConfigureDefaults(){
             //nextPage:  "pageConfigureEvents"
         ]
     } else {
-       //During initial setup this is the install page: Done installs the app and
-       //takes the user to the main menu (pageStart) so they can add Event Groups,
-       //instead of dropping them back on the Hubitat Apps list.
+       //During initial setup this is the install page. NOTE: Hubitat's Done button
+       //always returns to the Apps list (nextPage does not redirect it -- verified
+       //2026-11-06 on a fresh install), so the page tells the user to reopen the
+       //app from Apps to reach the main menu and add Event Groups.
        state.dynPageProperties = [
             name:      "pageConfigureDefaults",
             title:     "Configure Defaults",
             install:   true,
-            uninstall: false,
-            nextPage:  "pageStart"
+            uninstall: false
         ]
     }
     return dynamicPage(state.dynPageProperties) {
@@ -294,6 +294,11 @@ def pageConfigureDefaults(){
 			} else if (state?.debugMode == null) {
 				state.debugMode = (debugmode == true)
 			}
+        }
+        if (!(state?.installed == true)) {
+            section("What's next?"){
+                paragraph "After tapping Done, Hubitat returns you to the Apps list — that's normal. Reopen <strong>BigTalker</strong> from your Apps list and you'll land on the main menu, where you can add your Event Groups."
+            }
         }
     }
 }
@@ -1948,7 +1953,7 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.0-a6"	 
+		state.version = "3.0.0-a7"	 
 		state.InternalName = "BigTalker3-Parent-DEV" 
 		state.ExternalName = "BigTalker3-DEV"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App
