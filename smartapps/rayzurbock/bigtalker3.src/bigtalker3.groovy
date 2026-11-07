@@ -12,7 +12,6 @@ definition(
 preferences {
     page(name: "pageStart")
     page(name: "pageTalkNow")
-    page(name: "pageConfigureSpeechDeviceType")
     page(name: "pageConfigureDefaults")
     page(name: "pageHelpPhraseTokens")
 //End preferences
@@ -50,7 +49,7 @@ def pageStart(){
         section(){
         	LOGDEBUG("install state=${app.getInstallationState()}.")
             if (!(state.configOK)) { 
-                href "pageConfigureSpeechDeviceType", title:"Configure", description:"Tap to configure"
+                href "pageConfigureDefaults", title:"Configure", description:"Tap to configure"
             } else {
                 //V1Method href "pageConfigureEvents", title: "Configure Events", description: "Tap to configure events"
                 //href "pageStatus", title:"Status", description:"Tap to view status"
@@ -200,24 +199,6 @@ def pageHelpPhraseTokens(){
            paragraph(AvailTokens)
        }
    }
-}
-
-def pageConfigureSpeechDeviceType(){
-	def myNextPage = ""
-    if (!(state?.installed == true)) { state.installed = false; state.speechDeviceType = "auto"; myNextPage = "pageConfigureDefaults"}
-    dynamicPage(name: "pageConfigureSpeechDeviceType", title: "Configure", nextPage: myNextPage, install: false, uninstall: false) {
-        //section ("Speech Device Type Support"){
-        section (){
-			if (state.installed == true) { 
-				paragraph "<font color=red><strong>PROCEED WITH CAUTION!</strong></font>\n<font color=red><strong>WARNING!</strong></font> If you change this setting after the app has been configured, you will need to update your selected default and custom speech devices!\n <strong>To Cancel:</strong> Don't move the switch and press Next (or Done)\n<font color=red><strong>PROCEED WITH CAUTION!</strong></font>"
-			}
-            paragraph "${app.label} supports music players, speech speakers, and audio notification devices together -- no mode switching needed."
-            paragraph "'Music Player' typically supports devices such as Sonos, VLCThing.\n'Speech Synthesis' typically supports devices such as Google Home Speaker, Echo, Ubi and LANnouncer.\n'Audio Notification' supports devices that can play a notification track directly.\n\nBig Talker automatically uses the correct audio capability for each device you select -- no mode switching needed."
-            state.speechDeviceType = "auto"
-            //paragraph "Click Next to continue configuration...\n"
-        }
-    }
-//End pageConfigureSpeechDeviceType()
 }
 
 def pageConfigureDefaults(){
@@ -1953,7 +1934,7 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.0-a7"	 
+		state.version = "3.0.0-a8"	 
 		state.InternalName = "BigTalker3-Parent-DEV" 
 		state.ExternalName = "BigTalker3-DEV"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App
