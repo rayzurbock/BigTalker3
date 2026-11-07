@@ -3,6 +3,8 @@ Have you ever wanted a talking house? Now you can! With the Big Talker SmartApp!
 
 When Hubitat is paired with a compatible audio device (such as a Sonos, Echo, Google Home, LANnouncer, VLCThing, etc) and the Big Talker SmartApp, your house can say what you want it to say when events occur.
 
+Announcements can be spoken out loud through your speakers — or sent as text to notification devices such as the Hubitat mobile app, Telegram, and Pushover.
+
 BigTalker 3.0.0 is the only supported version. The 2.x line has reached end of life.
 
 ## Branches

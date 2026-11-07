@@ -2,7 +2,7 @@ definition(
     name: "BigTalker3-Parent-DEV",
     namespace: "rayzurbock",
     author: "rayzur@rayzurbock.com",
-    description: "Let's talk about mode changes, switches, motions, and so on.",
+    description: "Spoken and text announcements for mode changes, switches, motions, and more.",
     category: "Fun & Social",
 	//singleInstance: true,
     iconUrl: "https://lowrance.cc/ST/icons/BigTalker.png",
@@ -1934,7 +1934,7 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.0-a8"	 
+		state.version = "3.0.0-a9"	 
 		state.InternalName = "BigTalker3-Parent-DEV" 
 		state.ExternalName = "BigTalker3-DEV"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App
