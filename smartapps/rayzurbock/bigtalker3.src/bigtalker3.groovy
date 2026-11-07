@@ -89,7 +89,7 @@ def pageStart(){
 				def DonateOptions = ""
 				DonateOptions += "Big Talker is provided to the community for free.  It takes a lot of time to build and support any complex app.  If you wish to support the time and effort put into development you may submit a donation with one of the following:${formatBr}"
 				DonateOptions += "${formatUlStart}"
-                DonateOptions += "${formatLiStart}${formatStrongStart}Cash.me${formatStrongEnd} = <a target='_blank' href='https://cash.me/\$Lowrance'>https://cash.me/\$Lowrance</a> (use a debit card, it\'s free for both of us)${formatLiEnd}"
+                DonateOptions += "${formatLiStart}${formatStrongStart}Cash App${formatStrongEnd} = <a target='_blank' href='https://cash.app/\$Lowrance'>https://cash.app/\$Lowrance</a> (use a debit card, it\'s free for both of us)${formatLiEnd}"
                 DonateOptions += "${formatLiStart}${formatStrongStart}Venmo${formatStrongEnd} = <a target='_blank' href='https://venmo.com/code?user_id=2603208862072832399'>@BrianLowrance</a>${formatLiEnd}"
                 DonateOptions += "${formatLiStart}${formatStrongStart}Paypal.me${formatStrongEnd} = <a target='_blank' href='https://paypal.me/brianlowrance'>https://paypal.me/brianlowrance</a> (They take a little since I setup my account as a business account)${formatLiEnd}"
 				paragraph(DonateOptions)					
@@ -1934,7 +1934,7 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.0-a11"	 
+		state.version = "3.0.0-a12"	 
 		state.InternalName = "BigTalker3-Parent-DEV" 
 		state.ExternalName = "BigTalker3-DEV"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App
