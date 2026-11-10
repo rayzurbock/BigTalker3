@@ -1751,8 +1751,12 @@ def displayVersionStatus(){
 			versionInfo += "<img src='https://lowrance.cc/ST/icons/BigTalker-CurrentVersion.png'</img><BR>${state.ExternalName} - Version: ${state.version} <BR><font face='Lucida Handwriting'>${state.Copyright ?: ""} </font>"
 		}
     }
+	//The Check For Update button is always shown: it is the manual
+	//re-check control, not just an update-available indicator. It used
+	//to live inside the update-available condition below, so it vanished
+	//whenever the app was up to date.
+	input "updateBtn", "button", title: "${state.btnName}"
 	if((state.versionStatus != "${formatStrongStart}** This app is no longer supported by $state.author  **${formatStrongEnd}") & (state.versionStatus != "Current")){
-		input "updateBtn", "button", title: "${state.btnName}"
     
 		//  section(){
 		//		log.info "app.label = $app.label"
@@ -1954,7 +1958,7 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.1.3"	 
+		state.version = "3.0.1.4"	 
 		state.InternalName = "BigTalker3-Parent-DEV" 
 		state.ExternalName = "BigTalker3-DEV"
 }
