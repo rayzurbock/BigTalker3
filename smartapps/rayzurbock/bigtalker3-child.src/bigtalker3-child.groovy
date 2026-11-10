@@ -2670,7 +2670,7 @@ def updateCheckAllowed(){
 }
 
 def setVersion(){
-		state.version = "3.0.0-a10"	 
+		state.version = "3.0.1.1"	 
     	state.InternalName = "BigTalker3-Child-DEV" 
 		state.ExternalName = "BigTalker3 Child-DEV"
 		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App
