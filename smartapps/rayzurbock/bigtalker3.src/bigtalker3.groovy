@@ -1703,6 +1703,9 @@ def appButtonHandler(btn){
     if(state.btnCall == "updateBtn"){
        log.info "Checking for updates now..."
         updateCheck(true) //Manual re-check: 1-minute throttle so the button can't be spammed
+        //The hub's httpGet is async-only, so wait for the response
+        //to land before the page re-renders with the fresh result.
+        pause(3000)
   		state.btnName = state.versionBtn
         runIn(2, resetBtnName)
     }
@@ -1788,21 +1791,23 @@ def updateCheck(manual = false){
 		def newVer = ""
 		def currentVer = ""
 		try {
-			//Synchronous fetch: the response is in hand before this method returns,
-			//so the version information section re-renders with the fresh result
-			//and no pause is needed to wait on an async response.
-			def respUD = httpGet(paramsUD)
-			def copyrightRead = (respUD.data.copyright)
-			//Manifest content is our own; keep any HTML entity intact for display and roll the copyright year forward
-			state.Copyright = copyrightRead?.replaceFirst(/\b(19|20)\d{2}\b/, new Date().format("yyyy"))
-			def updateUri = (respUD.data.versions.UpdateInfo.GithubFiles.(state.InternalName))
-			state.updateURI = updateUri
-			newVerRaw = (respUD.data.versions.Application.(state.InternalName))
-			if (newVerRaw == null) {
-				//Not listed in the update manifest (e.g. DEV builds); nothing to compare against
-				state.versionStatus = "Current"
-				log.info "updateCheck(): ${state.InternalName} not found in update manifest; skipping version comparison"
-			} else {
+			//The hub only offers the async httpGet form (closure). There is
+			//no synchronous httpGet(Map) on Hubitat — calling it throws
+			//MissingMethodException, so the closure form is required.
+			httpGet(paramsUD) { respUD ->
+			  //log.warn " Version Checking - Response Data: ${respUD.data}"   // Troubleshooting Debug Code 
+				def copyrightRead = (respUD.data.copyright)
+				//Manifest content is our own; keep any HTML entity intact for display and roll the copyright year forward
+				state.Copyright = copyrightRead?.replaceFirst(/\b(19|20)\d{2}\b/, new Date().format("yyyy"))
+				def updateUri = (respUD.data.versions.UpdateInfo.GithubFiles.(state.InternalName))
+				state.updateURI = updateUri   
+				newVerRaw = (respUD.data.versions.Application.(state.InternalName))
+				if (newVerRaw == null) {
+					//Not listed in the update manifest (e.g. DEV builds); nothing to compare against
+					state.versionStatus = "Current"
+					log.info "updateCheck(): ${state.InternalName} not found in update manifest; skipping version comparison"
+					return
+				}
 				newVer = newVerRaw
 				def newVerCompare = newVer.toString().replaceAll(/[^0-9.]/, '')
 				currentVer = state.version.toString().replaceAll(/[^0-9.]/, '')
@@ -1811,8 +1816,8 @@ def updateCheck(manual = false){
 				log.debug "currentVer=${currentVer}, newVer=${newVer}"
 				state.updateCheckFailures = 0
 				if(newVer == "NLS"){
-					state.versionStatus = "<b>** This app is no longer supported by ${state.author}  **</b>"
-					log.warn "** This app is no longer supported by ${state.author} **"
+					state.versionStatus = "<b>** This app is no longer supported by ${state.author}  **</b>"  
+					log.warn "** This app is no longer supported by ${state.author} **" 
 				}
 				else if(isNewerVersion(newVerCompare, currentVer)){
 					state.versionStatus = "New Version Available (Version: ${newVerRaw})"
@@ -1820,8 +1825,8 @@ def updateCheck(manual = false){
 					log.warn "** ${escapeHtml(state.UpdateInfo ?: "")} **"
 					def updateMsg = "There is a new version of '${state.ExternalName}' available (Version: ${newVerRaw})"
 					//pushOverNow(updateMsg)
-				}
-				else{
+				} 
+				else{ 
 					state.versionStatus = "Current"
 					log.info "You are using the current version of this app"
 				}
@@ -1949,7 +1954,7 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.1.2"	 
+		state.version = "3.0.1.3"	 
 		state.InternalName = "BigTalker3-Parent-DEV" 
 		state.ExternalName = "BigTalker3-DEV"
 }
