@@ -1842,6 +1842,15 @@ def isNewerVersion(newVer, currentVer){
 	//Guard: only accept dotted-numeric version strings
 	if (!(newVer.toString() ==~ /[0-9]+(\.[0-9]+)*/)) { return false }
 	if (!(currentVer.toString() ==~ /[0-9]+(\.[0-9]+)*/)) { return false }
+	//Beta versions have four segments (3.0.1.1); anything with fewer
+	//segments is an old-scheme version. An old-scheme version is never
+	//newer than a beta, and a beta is always newer than an old-scheme
+	//version: the old "-a12" suffix strips to "012", which would
+	//otherwise compare as newer than 3.0.1.1.
+	def newPeriods = newVer.toString().count('.')
+	def curPeriods = currentVer.toString().count('.')
+	if (newPeriods < 3 && curPeriods == 3) { return false }
+	if (newPeriods == 3 && curPeriods < 3) { return true }
 	def newParts = newVer.toString().tokenize('.')*.toInteger()
 	def curParts = currentVer.toString().tokenize('.')*.toInteger()
 	for (int i = 0; i < Math.max(newParts.size(), curParts.size()); i++) {
@@ -1940,7 +1949,7 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.1.1"	 
+		state.version = "3.0.1.2"	 
 		state.InternalName = "BigTalker3-Parent-DEV" 
 		state.ExternalName = "BigTalker3-DEV"
 }
