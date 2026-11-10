@@ -1702,7 +1702,7 @@ def appButtonHandler(btn){
     state.btnCall = btn
     if(state.btnCall == "updateBtn"){
        log.info "Checking for updates now..."
-        updateCheck()
+        updateCheck(true) //Manual re-check: 1-minute throttle so the button can't be spammed
   		state.btnName = state.versionBtn
         runIn(2, resetBtnName)
     }
@@ -1769,12 +1769,12 @@ def displayVersionStatus(){
     paragraph versionInfo
 }
 
-def updateCheck(){
+def updateCheck(manual = false){
 	setVersion()
 	def lastKnownVersionStatus = state.versionStatus
 	if (state?.versionStatus == null) { state.versionStatus = "<i>Unknown</i>" }
 	def paramsUD = [uri: "https://lowrance.cc/ST/manifests/RayzurCodeHE.json"]
-	if (updateCheckAllowed() || lastKnownVersionStatus == "<i>Unknown</i>" || lastKnownVersionStatus == null){
+	if (updateCheckAllowed(manual) || lastKnownVersionStatus == "<i>Unknown</i>" || lastKnownVersionStatus == null){
 		state.Copyright = ""
 		state.updateURI = ""
 		state.UpdateInfo = ""
@@ -1849,21 +1849,27 @@ def isNewerVersion(newVer, currentVer){
 	return false
 }
 
-def updateCheckAllowed(){
+def updateCheckAllowed(manual = false){
 	// rayzurbock code, used with Cobra update code
+	//Automatic checks (page load) run at most every 30 minutes; the
+	//button re-check runs at most every 1 minute so it can't be spammed.
+	//Each path keeps its own next-check time, so a page load doesn't block
+	//the button and a button press doesn't reset the 30-minute clock.
+	def intervalMin = manual ? 1 : 30
+	def nextCheckKey = manual ? "updateNextManualCheckDate" : "updateNextCheckDate"
 	def proceed = false
 	def updateCheckCurrentDate = new Date().getTime()
-	def updateCheckIntervalInMil = (state.updateActiveUseIntervalMin * 60000)
+	def updateCheckIntervalInMil = (intervalMin * 60000)
 	if ((state?.updateCheckFailures ?: 0) >= 3) { updateCheckIntervalInMil = updateCheckIntervalInMil * 4 }
-	if (state?.updateNextCheckDate == null) { state.updateNextCheckDate = new Date().getTime() }
-	def timeDiff = state?.updateNextCheckDate - updateCheckCurrentDate
+	if (state[nextCheckKey] == null) { state[nextCheckKey] = new Date().getTime() }
+	def timeDiff = state[nextCheckKey] - updateCheckCurrentDate
 	if (timeDiff <= 0 || timeDiff == null) { proceed = true }
-	if (state?.updateNextCheckDate == null) { proceed = true }
+	if (state[nextCheckKey] == null) { proceed = true }
 	//if (!(proceed == true)) { log.debug "updateCheckAllowed() result: not allowed to proceed"}
 	LOGDEBUG("updateCheckAllowed() timeDiff=${timeDiff}, proceed=${proceed}")
 	if (proceed) {
 		//log.debug("updateCheckAllowed(): result: proceed")
-		state.updateNextCheckDate = new Date().getTime() + updateCheckIntervalInMil
+		state[nextCheckKey] = new Date().getTime() + updateCheckIntervalInMil
 		return true
 	} else { 
 		//log.debug("updateCheckAllowed(): result: do not proceed (${timeDiff})")
@@ -1930,8 +1936,7 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.0-a13"	 
+		state.version = "3.0.0-a14"	 
 		state.InternalName = "BigTalker3-Parent-DEV" 
 		state.ExternalName = "BigTalker3-DEV"
-		state.updateActiveUseIntervalMin = 1 //time in minutes to check for updates while using the App
 }
