@@ -1703,7 +1703,6 @@ def appButtonHandler(btn){
     if(state.btnCall == "updateBtn"){
        log.info "Checking for updates now..."
         updateCheck()
-        pause(3000)
   		state.btnName = state.versionBtn
         runIn(2, resetBtnName)
     }
@@ -1785,20 +1784,21 @@ def updateCheck(){
 		def newVer = ""
 		def currentVer = ""
 		try {
-			httpGet(paramsUD) { respUD ->
- 			  //log.warn " Version Checking - Response Data: ${respUD.data}"   // Troubleshooting Debug Code 
-				def copyrightRead = (respUD.data.copyright)
-				//Manifest content is our own; keep any HTML entity intact for display and roll the copyright year forward
-				state.Copyright = copyrightRead?.replaceFirst(/\b(19|20)\d{2}\b/, new Date().format("yyyy"))
-				def updateUri = (respUD.data.versions.UpdateInfo.GithubFiles.(state.InternalName))
-				state.updateURI = updateUri   
-				newVerRaw = (respUD.data.versions.Application.(state.InternalName))
-				if (newVerRaw == null) {
-					//Not listed in the update manifest (e.g. DEV builds); nothing to compare against
-					state.versionStatus = "Current"
-					log.info "updateCheck(): ${state.InternalName} not found in update manifest; skipping version comparison"
-					return
-				}
+			//Synchronous fetch: the response is in hand before this method returns,
+			//so the version information section re-renders with the fresh result
+			//and no pause is needed to wait on an async response.
+			def respUD = httpGet(paramsUD)
+			def copyrightRead = (respUD.data.copyright)
+			//Manifest content is our own; keep any HTML entity intact for display and roll the copyright year forward
+			state.Copyright = copyrightRead?.replaceFirst(/\b(19|20)\d{2}\b/, new Date().format("yyyy"))
+			def updateUri = (respUD.data.versions.UpdateInfo.GithubFiles.(state.InternalName))
+			state.updateURI = updateUri
+			newVerRaw = (respUD.data.versions.Application.(state.InternalName))
+			if (newVerRaw == null) {
+				//Not listed in the update manifest (e.g. DEV builds); nothing to compare against
+				state.versionStatus = "Current"
+				log.info "updateCheck(): ${state.InternalName} not found in update manifest; skipping version comparison"
+			} else {
 				newVer = newVerRaw
 				def newVerCompare = newVer.toString().replaceAll(/[^0-9.]/, '')
 				currentVer = state.version.toString().replaceAll(/[^0-9.]/, '')
@@ -1807,18 +1807,17 @@ def updateCheck(){
 				log.debug "currentVer=${currentVer}, newVer=${newVer}"
 				state.updateCheckFailures = 0
 				if(newVer == "NLS"){
-					state.versionStatus = "<b>** This app is no longer supported by ${state.author}  **</b>"  
-					log.warn "** This app is no longer supported by ${state.author} **" 
+					state.versionStatus = "<b>** This app is no longer supported by ${state.author}  **</b>"
+					log.warn "** This app is no longer supported by ${state.author} **"
 				}
 				else if(isNewerVersion(newVerCompare, currentVer)){
 					state.versionStatus = "New Version Available (Version: ${newVerRaw})"
 					log.warn "** There is a newer version of this app available  (Version: ${newVerRaw}) **"
 					log.warn "** ${escapeHtml(state.UpdateInfo ?: "")} **"
-					state.versionBtn = "UPDATE AVAILABLE"
 					def updateMsg = "There is a new version of '${state.ExternalName}' available (Version: ${newVerRaw})"
 					//pushOverNow(updateMsg)
-				} 
-				else{ 
+				}
+				else{
 					state.versionStatus = "Current"
 					log.info "You are using the current version of this app"
 				}
@@ -1827,12 +1826,9 @@ def updateCheck(){
 			state.updateCheckFailures = (state?.updateCheckFailures ?: 0) + 1
 			log.error "Something went wrong: CHECK THE JSON FILE AND IT'S URI -  $e"
 		}
-		if(state.versionStatus != "Current"){
-			state.versionBtn = "UPDATE AVAILABLE"
-		}
-		else{
-			state.versionBtn = "No Update Available"
-		}
+		//The button only re-checks; availability is shown in the version
+		//information below it, so the button never claims an update itself.
+		state.versionBtn = "Check For Update"
 	} else {
 		return
 	}
@@ -1934,8 +1930,8 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.0-a12"	 
+		state.version = "3.0.0-a13"	 
 		state.InternalName = "BigTalker3-Parent-DEV" 
 		state.ExternalName = "BigTalker3-DEV"
-		state.updateActiveUseIntervalMin = 30 //time in minutes to check for updates while using the App
+		state.updateActiveUseIntervalMin = 1 //time in minutes to check for updates while using the App
 }
