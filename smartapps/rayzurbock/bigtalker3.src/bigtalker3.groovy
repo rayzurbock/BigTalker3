@@ -1757,7 +1757,11 @@ def displayVersionStatus(){
 		//	}
 		//	pauseOrNot()   
 			//if(state.versionStatus != "Current"){
-		versionInfo += "${formatStrongStart}${escapeHtml(state.versionStatus ?: "")}${formatStrongEnd}${formatBr}${escapeHtml(state.updateURI ?: "")}${formatBr}${formatStrongStart}${formatIStart}Release Notes:${formatIEnd}${formatStrongEnd}${escapeHtml(state.UpdateInfo ?: "")}${formatBr}"
+		//updateURI and UpdateInfo are HTML from our own manifest (the download
+		//link and the release-notes list); escaping them shows the raw tags as
+		//text instead of rendering them, so they go in unescaped. versionStatus
+		//is plain text and stays escaped.
+		versionInfo += "${formatStrongStart}${escapeHtml(state.versionStatus ?: "")}${formatStrongEnd}${formatBr}${state.updateURI ?: ""}${formatBr}${formatStrongStart}${formatIStart}Release Notes:${formatIEnd}${formatStrongEnd}${state.UpdateInfo ?: ""}${formatBr}"
 			//}
 		//section(" ") {
 		//	input "updateNotification", "bool", title: "Send a 'Pushover' message when an update is available", required: true, defaultValue: false, submitOnChange: true 
@@ -1936,7 +1940,7 @@ def setFormatting(){
 
 def setVersion(){
 		//Cobra update code, modified by Rayzurbock
-		state.version = "3.0.0-a14"	 
+		state.version = "3.0.0-a15"	 
 		state.InternalName = "BigTalker3-Parent-DEV" 
 		state.ExternalName = "BigTalker3-DEV"
 }
